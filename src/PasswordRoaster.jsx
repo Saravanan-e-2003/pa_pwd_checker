@@ -1,87 +1,67 @@
 import React, { useState } from 'react';
+import { GoogleGenAI } from "@google/genai";
+// import { z } from "zod";
+// import { zodToJsonSchema } from "zod-to-json-schema";
 
 const PasswordRoaster = () => {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [resultFetched, setResultFetched] = useState(false);
+  const [loading,setLoading] = useState(false);
+  const [feedback, setFeedback] = useState("Loading...");
 
-  // Default State
-  const [feedback, setFeedback] = useState({
-    message: "Ready to analyze",
-    subtext: "Enter a password to check its strength and get helpful tips",
-    level: "NEUTRAL",
-    color: "text-slate-500"
-  });
+  // const feedbackSchema = z.object({
+//   message: z.string().describe("A concise summary of the password strength (e.g., 'Excellent', 'Weak', 'Reused')."),
+//   subtext: z.string().describe("A specific, actionable tip for the user on how to improve the password or its usage (e.g., 'Add a special character.', 'Avoid common dictionary words.')."),
+// });
 
-  const evaluatePassword = (val) => {
-    if (val.length === 0) {
-      return {
-        message: "Ready to analyze",
-        subtext: "Enter a password to check its strength and get helpful tips",
-        level: "NEUTRAL",
-        color: "text-slate-500"
-      };
-    }
-
-    const common = ["12345", "password", "qwerty", "admin", "12345678", "letmein", "welcome"];
-    if (common.includes(val.toLowerCase())) {
-      return {
-        message: "Very Weak Password",
-        subtext: "This password is commonly used and easily guessable. Please choose something more unique.",
-        level: "DANGER",
-        color: "text-red-600"
-      };
-    }
-
-    if (val.length < 6) {
-      return {
-        message: "Too Short",
-        subtext: "Passwords should be at least 6 characters long for basic security.",
-        level: "WARNING",
-        color: "text-orange-600"
-      };
-    }
-
-    const hasUpper = /[A-Z]/.test(val);
-    const hasNum = /[0-9]/.test(val);
-    const hasSpecial = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(val);
-
-    if (!hasUpper && !hasNum && !hasSpecial) {
-      return {
-        message: "Needs More Variety",
-        subtext: "Add uppercase letters, numbers, or special characters to make it stronger.",
-        level: "WARNING",
-        color: "text-orange-600"
-      };
-    }
-
-    if (val.length >= 12 && hasUpper && hasNum && hasSpecial) {
-      return {
-        message: "Excellent Password!",
-        subtext: "Your password meets all security requirements. Great job!",
-        level: "SECURE",
-        color: "text-green-600"
-      };
-    }
-
-    return {
-      message: "Good Password",
-      subtext: "This is acceptable, but consider making it longer for maximum security.",
-      level: "OK",
-      color: "text-blue-600"
-    };
-  };
-
+  const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
+  const ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
   const handleChange = (e) => {
     const val = e.target.value;
     setPassword(val);
-    setFeedback(evaluatePassword(val));
+    // setFeedback(evaluatePassword(val));
   };
 
-  const handleShare = () => {
-    const text = `Password Strength Check: ${feedback.message} - ${feedback.subtext}`;
-    navigator.clipboard.writeText(text);
-    alert("Result copied to clipboard!");
+  async function getRoast(password) {
+    try{
+      const response = await ai.models.generateContent({
+        model: "gemini-2.5-flash",
+        contents: `Roast the following password in a aggresive way, make it as funny as possible , [It should be not more than 1 line] : "${password}"`
+      });
+       if (!response.ok) {
+        // Capture specific HTTP errors (like 429 Rate Limit or 401 Unauthorized)
+        throw new Error(`API Error (${response.status}): ${response.statusText || 'Request failed'}`);
+      }
+
+      const result = await response.json();
+      const text = result.candidates?.[0]?.content?.parts?.[0]?.text;
+      
+      if (!text) throw new Error("The Roast Master is speechless (Empty AI response).");
+      
+      return { text };
+
+      // console.log(response.text);
+      // return response.text;
+    }catch(error){
+      console.error("Error generating content:", error.message);
+      return error.message || "An error occurred while generating content.";
+    }
+}
+  const handleCheck = async() => {
+    setLoading(true);
+    setFeedback("Loading..."); 
+
+    let roast = await getRoast(password);
+    roast = roast.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    roast = roast.replace(/\*(.*?)\*/g, '<em>$1</em>');
+    // console.log(roast);
+    setFeedback(roast);
+    setLoading(false);
+    setResultFetched(true);
   };
+
+  const buttonText = loading ? "loading..." : "Check";
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 sm:p-6 lg:p-8 bg-[#a9d2b8]">
@@ -91,7 +71,7 @@ const PasswordRoaster = () => {
           {/* Header */}
           <div className="bg-[#242424] p-6 text-white">
             <div className="text-center">
-              <h1 className="text-2xl text-[#fff7e4] sm:text-3xl font-bold mb-2">Password Strength</h1>
+              <h1 className="text-2xl text-[#fff7e4] sm:text-3xl font-bold mb-2">Password Roaster</h1>
               <p className="text-[#f5edda] text-sm sm:text-base">Get honest feedback about your password</p>
             </div>
           </div>
@@ -172,32 +152,23 @@ const PasswordRoaster = () => {
             {/* Share Button */}
             {password.length > 0 && (
               <button
-                onClick={handleShare}
+                onClick={handleCheck}
+                disabled={loading}
+
                 className="w-full bg-[#242424] hover:bg-[#fff7e4] text-[#fff7e4] hover:text-[#242424] font-semibold py-4 px-6 rounded-xl transition-all duration-200 transform  shadow-[4px_4px_0_#242424] border-2 border-[#242424]"
               >
-                Check
+                {buttonText}
               </button>
             )}
 
             {/* Feedback Message */}
-            {password && (
-              <div className={`p-5 rounded-xl border-2 transition-all duration-300 ${
-                feedback.level === 'SECURE' ? 'bg-green-50 border-green-200 text-green-800' :
-                feedback.level === 'OK' ? 'bg-blue-50 border-blue-200 text-blue-800' :
-                feedback.level === 'WARNING' ? 'bg-orange-50 border-orange-200 text-orange-800' :
-                'bg-red-50 border-red-200 text-red-800'
+            {resultFetched && (
+              <div className={`p-5 rounded-xl border-2 transition-all duration-300 
+                bg-red-50 border-red-200 text-red-800
               }`}>
                 <div className="text-center">
-                  <div className={`text-lg sm:text-xl font-bold mb-2 ${
-                    feedback.level === 'SECURE' ? 'text-green-700' :
-                    feedback.level === 'OK' ? 'text-blue-700' :
-                    feedback.level === 'WARNING' ? 'text-orange-700' :
-                    'text-red-700'
-                  }`}>
-                    {feedback.message}
-                  </div>
                   <p className="text-sm sm:text-base leading-relaxed opacity-90">
-                    {feedback.subtext}
+                    <span dangerouslySetInnerHTML={{ __html: feedback }}></span>
                   </p>
                 </div>
               </div>
