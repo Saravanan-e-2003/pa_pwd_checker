@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { GoogleGenAI } from "@google/genai";
-// import { z } from "zod";
-// import { zodToJsonSchema } from "zod-to-json-schema";
+
 
 const PasswordRoaster = () => {
   const [password, setPassword] = useState('');
@@ -10,17 +9,13 @@ const PasswordRoaster = () => {
   const [loading,setLoading] = useState(false);
   const [feedback, setFeedback] = useState("Loading...");
   let replyColor = 'border-green-600 text-green-800'
-  // const feedbackSchema = z.object({
-//   message: z.string().describe("A concise summary of the password strength (e.g., 'Excellent', 'Weak', 'Reused')."),
-//   subtext: z.string().describe("A specific, actionable tip for the user on how to improve the password or its usage (e.g., 'Add a special character.', 'Avoid common dictionary words.')."),
-// });
+
 
   const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
   const ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
   const handleChange = (e) => {
     const val = e.target.value;
     setPassword(val);
-    // setFeedback(evaluatePassword(val));
   };
 
   async function getRoast(password) {
@@ -29,14 +24,8 @@ const PasswordRoaster = () => {
         model: "gemini-2.5-flash",
         contents: `Roast the following password in a aggresive way, make it as funny as possible , [It should be not more than 1 line] : "${password}"`
       });
-      console.log(response.text);
-
-      // const result = response;
-      // const text = result.candidates?.[0]?.content?.parts?.[0]?.text;
       
-      // if (!text) throw new Error("The Roast Master is speechless (Empty AI response).");
-      
-      // return { text };      
+    
       return response.text;
     }catch(error){
       replyColor = 'border-red-600 text-red-800'
@@ -51,7 +40,7 @@ const PasswordRoaster = () => {
     let roast = await getRoast(password);
     roast = roast.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
     roast = roast.replace(/\*(.*?)\*/g, '<em>$1</em>');
-    // console.log(roast);
+
     setFeedback(roast);
     setLoading(false);
     setResultFetched(true);
@@ -68,7 +57,7 @@ const PasswordRoaster = () => {
           <div className="bg-[#242424] p-6 text-white">
             <div className="text-center">
               <h1 className="text-2xl text-[#fff7e4] sm:text-3xl font-bold mb-2">Password Roaster</h1>
-              <p className="text-[#f5edda] text-sm sm:text-base">Get honest feedback about your password</p>
+              <p className="text-[#f5edda] text-sm sm:text-base">Security advice with a side of salt</p>
             </div>
           </div>
 
@@ -105,46 +94,6 @@ const PasswordRoaster = () => {
               </div>
             </div>
 
-            {/* Strength Indicator */}
-            {/* {password && (
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-semibold text-slate-700">Password Strength</span>
-                  <div className="flex items-center space-x-2">
-                    <div className={`w-2 h-2 rounded-full ${
-                      feedback.level === 'SECURE' ? 'bg-green-500' :
-                      feedback.level === 'OK' ? 'bg-blue-500' :
-                      feedback.level === 'WARNING' ? 'bg-orange-500' :
-                      'bg-red-500'
-                    }`}></div>
-                    <span className={`text-sm font-semibold ${
-                      feedback.level === 'SECURE' ? 'text-green-600' :
-                      feedback.level === 'OK' ? 'text-blue-600' :
-                      feedback.level === 'WARNING' ? 'text-orange-600' :
-                      'text-red-600'
-                    }`}>
-                      {feedback.level === 'SECURE' ? 'Strong' :
-                       feedback.level === 'OK' ? 'Good' :
-                       feedback.level === 'WARNING' ? 'Weak' :
-                       'Very Weak'}
-                    </span>
-                  </div>
-                </div> */}
-
-                {/* Progress Bar
-                <div className="w-full bg-slate-200 rounded-full h-3 overflow-hidden">
-                  <div
-                    className={`h-full rounded-full transition-all duration-500 ease-out ${
-                      feedback.level === 'SECURE' ? 'bg-gradient-to-r from-green-400 to-green-600 w-full' :
-                      feedback.level === 'OK' ? 'bg-gradient-to-r from-blue-400 to-blue-600 w-3/4' :
-                      feedback.level === 'WARNING' ? 'bg-gradient-to-r from-orange-400 to-orange-600 w-1/2' :
-                      'bg-gradient-to-r from-red-400 to-red-600 w-1/4'
-                    }`}
-                  ></div>
-                </div> */}
-              {/* </div>
-            )} */}
-            
             {/* Share Button */}
             {password.length > 0 && (
               <button
@@ -176,7 +125,7 @@ const PasswordRoaster = () => {
         {/* Footer */}
         <div className="text-center mt-6">
           <p className="text-slate-500 text-sm">
-            Keep your passwords strong and secure
+            Powered by AI and pure spite.
           </p>
         </div>
       </div>
