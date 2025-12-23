@@ -9,7 +9,7 @@ const PasswordRoaster = () => {
   const [resultFetched, setResultFetched] = useState(false);
   const [loading,setLoading] = useState(false);
   const [feedback, setFeedback] = useState("Loading...");
-
+  let replyColor = 'border-green-600 text-green-800'
   // const feedbackSchema = z.object({
 //   message: z.string().describe("A concise summary of the password strength (e.g., 'Excellent', 'Weak', 'Reused')."),
 //   subtext: z.string().describe("A specific, actionable tip for the user on how to improve the password or its usage (e.g., 'Add a special character.', 'Avoid common dictionary words.')."),
@@ -29,21 +29,17 @@ const PasswordRoaster = () => {
         model: "gemini-2.5-flash",
         contents: `Roast the following password in a aggresive way, make it as funny as possible , [It should be not more than 1 line] : "${password}"`
       });
-       if (!response.ok) {
-        // Capture specific HTTP errors (like 429 Rate Limit or 401 Unauthorized)
-        throw new Error(`API Error (${response.status}): ${response.statusText || 'Request failed'}`);
-      }
+      console.log(response.text);
 
-      const result = await response.json();
-      const text = result.candidates?.[0]?.content?.parts?.[0]?.text;
+      // const result = response;
+      // const text = result.candidates?.[0]?.content?.parts?.[0]?.text;
       
-      if (!text) throw new Error("The Roast Master is speechless (Empty AI response).");
+      // if (!text) throw new Error("The Roast Master is speechless (Empty AI response).");
       
-      return { text };
-
-      // console.log(response.text);
-      // return response.text;
+      // return { text };      
+      return response.text;
     }catch(error){
+      replyColor = 'border-red-600 text-red-800'
       console.error("Error generating content:", error.message);
       return error.message || "An error occurred while generating content.";
     }
@@ -164,7 +160,7 @@ const PasswordRoaster = () => {
             {/* Feedback Message */}
             {resultFetched && (
               <div className={`p-5 rounded-xl border-2 transition-all duration-300 
-                bg-red-50 border-red-200 text-red-800
+                bg-red-50 border-${replyColor} text-${replyColor
               }`}>
                 <div className="text-center">
                   <p className="text-sm sm:text-base leading-relaxed opacity-90">
