@@ -1,18 +1,37 @@
-# React + Vite
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
-Currently, two official plugins are available:
+# Password Roaster
+**Go ahead, get roasted:** [pwd-roaster.vercel.app](https://pwd-roaster.vercel.app/) 🚀
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+---
 
-## React Compiler
+## 🚀 Speed-Run Setup
 
-The React Compiler is enabled on this template. See [this documentation](https://react.dev/learn/react-compiler) for more information.
+1. **Yoink the code**:
+```bash
+git clone https://github.com/your-username/password-roaster.git
 
-Note: This will impact Vite dev & build performances.
+```
 
-## Expanding the ESLint configuration
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+2. **Gimme dependencies**:
+```bash
+npm install
+
+```
+
+
+3. **Feed the AI**: Pop your `VITE_GEMINI_API_KEY` into a `.env` file.
+4. **LFG**:
+```bash
+npm run dev
+
+```
+
+
+
+---
+
+## 📜 Reality Check (Disclaimer)
+
+Look, this is for the lulz. Don't go putting your *actual* bank password into a site called "Password Roaster." If you do, you probably deserve the roast you're about to get. 🤷‍♂️
